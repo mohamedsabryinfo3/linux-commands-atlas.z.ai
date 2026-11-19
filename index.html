@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="منصة تفاعلية لأهم أوامر Linux في مسار SOC Analyst من L1 إلى L2: مسار إتقان للحفظ + مرجع قتالي كامل للرجوع">
+<title>SOC // Linux Deck — مرجع أوامر لينكس لمحللي مركز العمليات الأمنية</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 29 9v14L16 30 3 23V9z' fill='none' stroke='%2322d3ee' stroke-width='2.5'/%3E%3Cpath d='M10 12h12M10 16h8' stroke='%234ade80' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#04060c; --bg1:#0a0f1c; --bg2:#0d1526; --bg3:#111b30;
+  --line:#1c2b47; --line2:#27405f;
+  --txt:#dde8fb; --dim:#8ea6cc; --faint:#5d7396;
+  --cyan:#22d3ee; --green:#4ade80; --amber:#fbbf24; --red:#fb7185; --violet:#a78bfa; --teal:#2dd4bf;
+  --mono:'JetBrains Mono','Courier New',monospace;
+  --sans:'Cairo','Segoe UI',Tahoma,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans); background:var(--bg0); color:var(--txt);
+  background-image:
+    radial-gradient(900px 500px at 85% -5%, rgba(34,211,238,.08), transparent 60%),
+    radial-gradient(800px 500px at -10% 30%, rgba(74,222,128,.05), transparent 60%),
+    linear-gradient(rgba(34,211,238,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,.035) 1px, transparent 1px);
+  background-size:auto,auto,44px 44px,44px 44px;
+  min-height:100vh; overflow-x:hidden;
+}
+::selection{background:rgba(34,211,238,.35)}
+a{color:var(--cyan)}
+.wrap{max-width:1240px;margin-inline:auto;padding-inline:clamp(14px,4vw,32px)}
+.hide{display:none!important}
+
+/* ── progress bar ── */
+#progress{position:fixed;top:0;right:0;height:3px;width:0;background:linear-gradient(90deg,var(--green),var(--cyan));z-index:99;transition:width .1s linear}
+
+/* ── header ── */
+header.site{position:sticky;top:0;z-index:50;background:rgba(4,6,12,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.site-in{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--txt)}
+.brand-mark{width:40px;height:40px;flex:none;display:grid;place-items:center;background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(74,222,128,.08));border:1px solid var(--line2);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);font-family:var(--mono);color:var(--cyan);font-weight:700;font-size:15px}
+.brand b{font-size:17px;font-weight:900;letter-spacing:.3px;display:block;line-height:1.2}
+.brand small{font-family:var(--mono);font-size:10.5px;color:var(--faint);display:block;text-align:right;direction:ltr}
+.brand-txt :last-child{direction:rtl}
+
+/* ── hero ── */
+.hero{position:relative;padding-block:clamp(40px,7vw,84px) clamp(28px,4vw,48px);overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(34,211,238,.05) 50%,transparent 60%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,4vw,52px);align-items:center}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--green);border:1px solid rgba(74,222,128,.35);padding:6px 14px;background:rgba(74,222,128,.06);clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);margin-bottom:18px}
+.kicker i{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.2}}
+.hero h1{font-size:clamp(28px,5.2vw,54px);font-weight:900;line-height:1.35;margin-bottom:6px}
+.hero h1 .en{font-family:var(--mono);font-weight:700;background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent;direction:ltr;display:inline-block}
+.hero p.sub{color:var(--dim);font-size:clamp(14px,1.8vw,17px);line-height:2;max-width:56ch;margin-block:14px 24px}
+.stats{display:flex;flex-wrap:wrap;gap:12px}
+.stat{border:1px solid var(--line2);background:linear-gradient(180deg,var(--bg2),var(--bg1));padding:12px 20px;min-width:120px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+.stat b{display:block;font-family:var(--mono);font-size:clamp(20px,2.6vw,28px);color:var(--cyan);direction:ltr;text-align:right}
+.stat span{font-size:12px;color:var(--dim)}
+
+/* ── terminal mock ── */
+.term{border:1px solid var(--line2);background:#060b16;box-shadow:0 24px 70px rgba(0,0,0,.55),0 0 0 1px rgba(34,211,238,.06),0 0 44px rgba(34,211,238,.05);clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px));position:relative}
+.term::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none}
+.term-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;border-bottom:1px solid var(--line);background:rgba(13,21,38,.8)}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.term-title{margin-inline-start:auto;font-family:var(--mono);font-size:11px;color:var(--faint);direction:ltr}
+.term-body{padding:16px 18px;font-family:var(--mono);font-size:clamp(11px,1.3vw,13.5px);line-height:1.9;direction:ltr;text-align:left;min-height:290px}
+.tl{white-space:pre-wrap;word-break:break-word}
+.tl .pr{color:var(--green);font-weight:600}
+.tl .u{color:var(--cyan)}
+.tl.o{color:var(--dim)}
+.tl.o .hl{color:var(--red)}
+.tl.o .ok{color:var(--green)}
+.cursor{display:inline-block;width:9px;height:16px;background:var(--cyan);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+
+/* ── roadmap ── */
+.road{margin-top:clamp(28px,4vw,44px)}
+.road h2{font-size:15px;font-weight:700;color:var(--dim);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.road h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+.road-steps{display:flex;flex-wrap:wrap;gap:8px}
+.rs{font-size:clamp(12px,1.4vw,14px);font-weight:700;padding:10px 18px 10px 26px;background:var(--bg2);border:1px solid var(--line);color:var(--dim);clip-path:polygon(12px 0,100% 0,100% 100%,12px 100%,0 50%);display:flex;align-items:center;gap:8px}
+.rs i{font-family:var(--mono);font-size:10px;color:var(--faint);font-style:normal}
+.rs.on{background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(74,222,128,.1));border-color:rgba(34,211,238,.45);color:var(--txt)}
+.rs.on i{color:var(--green)}
+
+/* ── toolbar: tabs + search ── */
+.toolbar{position:sticky;top:65px;z-index:40;background:rgba(4,6,12,.9);backdrop-filter:blur(12px);border-block:1px solid var(--line);padding-block:12px;margin-top:8px}
+.tool-in{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.tab{cursor:pointer;border:1px solid var(--line2);background:var(--bg2);color:var(--dim);font-family:var(--sans);font-weight:700;font-size:clamp(12px,1.5vw,14.5px);padding:11px 20px;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);transition:.2s;display:flex;align-items:center;gap:9px}
+.tab i{font-family:var(--mono);font-size:11px;font-style:normal;opacity:.8}
+.tab:hover{color:var(--txt);border-color:var(--cyan)}
+.tab.active{background:linear-gradient(135deg,rgba(34,211,238,.2),rgba(74,222,128,.12));border-color:var(--cyan);color:#fff}
+.search-box{display:flex;align-items:center;gap:10px;border:1px solid var(--line2);background:var(--bg1);padding:9px 16px;min-width:min(360px,100%);flex:1;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+.search-box svg{flex:none;width:16px;height:16px;stroke:var(--faint)}
+#q{flex:1;background:none;border:none;outline:none;color:var(--txt);font-family:var(--mono);font-size:13.5px;direction:rtl}
+#q::placeholder{color:var(--faint)}
+.kbd{font-family:var(--mono);font-size:11px;color:var(--faint);border:1px solid var(--line2);padding:2px 8px;flex:none}
+#count{font-family:var(--mono);font-size:11.5px;color:var(--dim);white-space:nowrap}
+
+/* ── panels ── */
+.panel{padding-block:clamp(28px,4vw,52px) 10px}
+.panel-intro{border-inline-start:3px solid var(--cyan);padding:6px 18px 6px 0;margin-bottom:26px}
+.panel[data-sec="soc"] .panel-intro{border-color:var(--amber)}
+.pi-code{font-family:var(--mono);font-size:11.5px;color:var(--green);letter-spacing:1px;direction:ltr;text-align:right;display:block;margin-bottom:6px}
+.panel[data-sec="soc"] .pi-code{color:var(--amber)}
+.panel-intro h2{font-size:clamp(21px,3.4vw,32px);font-weight:900;margin-bottom:8px}
+.panel-intro p{color:var(--dim);line-height:2;max-width:80ch;font-size:14.5px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:30px}
+.chip{cursor:pointer;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--dim);border:1px solid var(--line);background:var(--bg1);padding:7px 15px;transition:.15s;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.chip:hover{color:var(--txt);border-color:var(--g,var(--cyan))}
+.chip.active{color:#04060c;background:var(--g,var(--cyan));border-color:var(--g,var(--cyan));font-weight:700}
+
+/* ── groups ── */
+.group{margin-bottom:clamp(30px,4vw,46px)}
+.g-head{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px dashed var(--line2);flex-wrap:wrap}
+.g-num{flex:none;width:52px;height:52px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(255,255,255,.04),transparent);border:1px solid var(--ga,var(--cyan));color:var(--ga,var(--cyan));font-family:var(--mono);font-weight:700;font-size:15px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.g-titles{flex:1;min-width:220px}
+.g-titles h3{font-size:clamp(17px,2.4vw,22px);font-weight:900;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.g-titles h3 code{font-family:var(--mono);font-size:11px;color:var(--ga,var(--cyan));border:1px solid var(--line2);padding:2px 9px;direction:ltr;font-weight:600}
+.g-titles p{color:var(--dim);font-size:13px;margin-top:4px;line-height:1.8}
+.g-badge{font-family:var(--mono);font-size:11px;color:var(--dim);border:1px solid var(--line2);padding:6px 13px;background:var(--bg1);white-space:nowrap;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.g-badge b{color:var(--ga,var(--cyan))}
+
+/* ── command cards ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:16px}
+.card{position:relative;min-width:0;border:1px solid var(--line2);background:linear-gradient(160deg,var(--bg2) 0%,var(--bg1) 100%);padding:18px 18px 16px;transition:.22s;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));display:flex;flex-direction:column;gap:10px}
+.card::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:3px;background:var(--ga,var(--cyan));opacity:.85}
+.card:hover{transform:translateY(-4px);border-color:var(--ga,var(--cyan));box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 24px color-mix(in srgb,var(--ga,var(--cyan)) 12%,transparent)}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card .cmd{font-family:var(--mono);font-weight:700;font-size:clamp(15px,1.8vw,17.5px);color:var(--ga,var(--cyan));direction:ltr;word-break:break-all}
+.copy{flex:none;cursor:pointer;width:34px;height:32px;display:grid;place-items:center;background:var(--bg3);border:1px solid var(--line2);color:var(--dim);font-size:14px;transition:.15s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.copy:hover{color:var(--ga,var(--cyan));border-color:var(--ga,var(--cyan))}
+.copy.done{color:var(--green);border-color:var(--green)}
+.fn{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.fn-tag{flex:none;font-size:10.5px;font-weight:700;color:#04060c;background:var(--ga,var(--cyan));padding:2px 9px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.fn-text{font-size:14px;font-weight:700}
+.card .desc{color:var(--dim);font-size:13px;line-height:2;flex:1}
+.ex{direction:ltr;text-align:left;background:#060b16;border:1px solid var(--line);border-inline-start:2px solid var(--ga,var(--cyan));padding:9px 13px;font-family:var(--mono);font-size:12px;color:var(--green);overflow-x:auto;cursor:pointer;white-space:nowrap}
+.ex .ps{color:var(--faint);margin-right:8px}
+.ex:hover{border-color:var(--ga,var(--cyan))}
+
+/* ── one-liners ── */
+.oneliner{border:1px solid var(--line2);background:linear-gradient(160deg,var(--bg2),var(--bg1));margin-bottom:16px;padding:16px 18px;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+.ol-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.ol-idx{flex:none;font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--amber);border:1px solid rgba(251,191,36,.4);padding:3px 10px;direction:ltr}
+.ol-head h4{font-size:15.5px;font-weight:900;flex:1;min-width:200px}
+.ol-cmd{direction:ltr;text-align:left;background:#060b16;border:1px solid var(--line);border-inline-start:2px solid var(--amber);padding:12px 15px;font-family:var(--mono);font-size:clamp(11px,1.4vw,13px);color:var(--green);overflow-x:auto;cursor:pointer;white-space:pre;margin-bottom:10px}
+.ol-cmd:hover{border-color:var(--amber)}
+.ol-steps{color:var(--dim);font-size:13px;line-height:2.1}
+.ol-steps b{color:var(--txt)}
+
+/* ── empty / footer / toast ── */
+.empty{display:none;text-align:center;padding:50px 20px;color:var(--faint);font-family:var(--mono);font-size:13px;border:1px dashed var(--line2)}
+.empty.show{display:block}
+footer.site{margin-top:60px;border-top:1px solid var(--line);background:var(--bg1)}
+.foot-in{padding-block:30px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;color:var(--faint);font-size:12.5px;line-height:1.9}
+.foot-in code{font-family:var(--mono);color:var(--dim);direction:ltr;display:inline-block}
+#toast{position:fixed;bottom:26px;inset-inline-start:50%;transform:translateX(50%) translateY(80px);background:var(--bg3);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:12.5px;padding:11px 22px;z-index:100;opacity:0;transition:.25s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+#toast.show{opacity:1;transform:translateX(50%) translateY(0)}
+html[dir="rtl"] #toast{transform:translateX(50%) translateY(80px)}
+html[dir="rtl"] #toast.show{transform:translateX(50%) translateY(0)}
+
+/* ── responsive ── */
+@media (max-width:960px){
+  .hero-grid{grid-template-columns:1fr}
+  .toolbar{top:63px}
+}
+@media (max-width:640px){
+  .site-in{flex-wrap:wrap}
+  .toolbar{position:static}
+  .tabs{width:100%}
+  .tab{flex:1;justify-content:center;padding:10px 8px;font-size:12px}
+  .tool-in{gap:10px}
+  .search-box{min-width:100%}
+  .cards{grid-template-columns:1fr}
+  .g-num{width:42px;height:42px;font-size:13px}
+  .g-badge{display:none}
+  .ol-cmd{white-space:pre-wrap;word-break:break-all;font-size:10.5px}
+  .ex{font-size:10.5px}
+  .hero p.sub{line-height:1.9}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header class="site">
+  <div class="wrap site-in">
+    <a class="brand" href="#top">
+      <span class="brand-mark">&gt;_</span>
+      <span class="brand-txt">
+        <b>مرجع أوامر SOC</b>
+        <small>soc://linux-deck · L1 → L2</small>
+      </span>
+    </a>
+    <nav class="tabs" style="border:none;padding:0;background:none;clip-path:none">
+      <button class="tab active" data-tab="core"><i>TRK-01</i> مسار الإتقان</button>
+      <button class="tab" data-tab="soc"><i>TRK-02</i> مرجع SOC</button>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <span class="kicker"><i></i> SOC ANALYST ROADMAP · DEFENSIVE OPS</span>
+          <h1>أتقن طرفية لينكس<br>من <span class="en">SOC L1</span> إلى <span class="en">L2</span></h1>
+          <p class="sub">
+            منصة تدريبية تفاعلية تُبنى على فلسفة واحدة: المحلل الذي يفتح الطرفية ويكتب الأمر من ذاكرته
+            أسرع بمراحل من الذي يبحث عن كل أمر في كل مرة. المسار الأول يحفظك الأوامر الجوهرية عن ظهر قلب،
+            والمسار الثاني مرجع قتالي كامل ترجع إليه أثناء التحقيقات، مصنفاً حسب مراحل عمل مركز العمليات الأمنية.
+          </p>
+          <div class="stats">
+            <div class="stat"><b id="stCmds">0</b><span>أمر وشرح مفصّل</span></div>
+            <div class="stat"><b id="stGroups">0</b><span>فئة تشغيلية</span></div>
+            <div class="stat"><b id="stLines">0</b><span>خط قتال جاهز</span></div>
+          </div>
+        </div>
+        <div class="term" aria-hidden="true">
+          <div class="term-bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="term-title">analyst@soc-core: ~/investigations</span>
+          </div>
+          <div class="term-body" id="termBody"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════ ROADMAP ═══════════ -->
+      <div class="road">
+        <h2>مسار الرحلة التدريبية</h2>
+        <div class="road-steps">
+          <span class="rs on"><i>00</i> أساسيات لينكس</span>
+          <span class="rs on"><i>01</i> قراءة السجلات</span>
+          <span class="rs on"><i>02</i> تحليل الشبكة</span>
+          <span class="rs"><i>03</i> التحقيق الرقمي</span>
+          <span class="rs"><i>04</i> الاستجابة للحوادث</span>
+          <span class="rs"><i>05</i> SOC L1 — المراقبة</span>
+          <span class="rs"><i>06</i> SOC L2 — التحقيق العميق</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ TOOLBAR ═══════════ -->
+  <div class="toolbar">
+    <div class="wrap tool-in">
+      <div class="tabs">
+        <button class="tab active" data-tab="core"><i>// TRK-01</i> أوامر احفظها</button>
+        <button class="tab" data-tab="soc"><i>// TRK-02</i> مرجع SOC للرجوع</button>
+      </div>
+      <label class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+        <input id="q" type="search" placeholder="ابحث عن أمر، وظيفة، أو حالة استخدام…" autocomplete="off">
+        <span class="kbd">/</span>
+      </label>
+      <span id="count" dir="ltr"></span>
+    </div>
+  </div>
+
+  <!-- ═══════════ PANELS ═══════════ -->
+  <div class="wrap">
+    <section class="panel active" data-sec="core" id="panel-core">
+      <div class="panel-intro">
+        <span class="pi-code">// TRACK_01 — CORE_MEMORIZATION</span>
+        <h2>المسار الأول: أوامر يجب أن تسكن في عضلاتك</h2>
+        <p>
+          هذه هي الأوامر التي يستخدمها المحلل يومياً حتى قبل أي تحقيق: التنقل، قراءة الملفات، البحث،
+          الصلاحيات، العمليات، الشبكة، وإدارة النظام. القاعدة هنا: <b>لا تنتقل لمرجع SOC قبل إتقان هذه</b>.
+          جرّب نفسك: افتح طرفية حقيقية ونفّذ كل مثال مكتوب في البطاقات، فاليد التي كتبت الأمر مرتين
+          تحفظه عشر مرات أسرع من العين التي قرأته.
+        </p>
+      </div>
+      <div class="chips" data-chips="core"></div>
+      <div id="groups-core"></div>
+      <div class="empty" id="empty-core">NO RESULTS — جرّب كلمة أخرى أو امسح الفلاتر</div>
+    </section>
+
+    <section class="panel hide" data-sec="soc" id="panel-soc">
+      <div class="panel-intro">
+        <span class="pi-code">// TRACK_02 — SOC_BATTLE_REFERENCE</span>
+        <h2>المسار الثاني: مرجع SOC القتالي — للرجوع عند الحاجة</h2>
+        <p>
+          مكتبتك أثناء التحقيقات: مصنفة حسب مراحل عمل مركز العمليات — أين أجد الدليل؟ كيف أحلل الشبكة؟
+          كيف أفتش العمليات والمستخدمين؟ كيف أفحص ملفاً مشبوهاً وأستجيب؟ في نهايتها قسم
+          <b>خطوط القتال (One-Liners)</b>: أنابيب أوامر جاهزة لسيناريوهات الصيد الشهيرة.
+          هذه البطاقات لا تُحفظ كلها بل تُستدعى: اعرف مكانها لتصل إليها في ثوانٍ وقت الحاجة.
+        </p>
+      </div>
+      <div class="chips" data-chips="soc"></div>
+      <div id="groups-soc"></div>
+      <div class="empty" id="empty-soc">NO RESULTS — جرّب كلمة أخرى أو امسح الفلاتر</div>
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot-in">
+    <span>أُعدت كمرجع تدريبي لمسار <b>SOC Analyst L1 → L2</b> — استخدم الأوامر على أنظمة تملك صلاحية الاختبار عليها فقط، فالغرض دفاعي بحت.</span>
+    <span><code>cat /dev/curiosity &gt; skills.log</code></span>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════ DATA ═══════════════ */
+const CORE = [];
+CORE.push(
+{
+  num:"01", code:"NAV", color:"#22d3ee",
+  title:"التنقل والاستكشاف",
+  desc:"قبل أي تحليل تحتاج أن تعرف: أين أنا؟ ماذا حولي؟ وكيف أطلب المساعدة من النظام نفسه؟",
+  cmds:[
+    {c:"pwd", f:"طباعة مسار المجلد الحالي", d:"يطبع المسار الكامل للمجلد الذي تقف فيه الآن. أول أمر يمنعك من الضياع داخل شجرة الملفات، وفي التحقيقات يخبرك بالضبط من أين تنفذ الأوامر.", x:"pwd"},
+    {c:"cd", f:"التنقل بين المجلدات", d:"ينقلك بين المجلدات: cd /var/log بمسار مطلق، و cd .. للرجوع خطوة واحدة للأعلى، و cd ~ للعودة للمجلد الرئيسي، و cd - للرجوع للمجلد السابق. أهم أمر ستكتبه في حياتك على الطرفية.", x:"cd /var/log"},
+    {c:"ls", f:"عرض محتويات المجلد", d:"يسرد الملفات والمجلدات: -l بالتفاصيل الكاملة (الصلاحيات، المالك، الحجم، التاريخ)، و -a يكشف الملفات المخفية التي تبدأ بنقطة، و -h بأحجام مقروءة، و -t بالأحدث أولاً، و -r لعكس الترتيب.", x:"ls -lahtr /var/log"},
+    {c:"tree", f:"عرض الشجرة الهرمية للمجلدات", d:"يرسم هيكل المجلدات والملفات على شكل شجرة متفرعة، فيفهم المحلل شكل نظام الملفات بنظرة واحدة. الخيار -L 2 يحدد عمق المستويين فقط لتفادي إغراق الشاشة.", x:"tree -L 2 /etc"},
+    {c:"man", f:"دليل الاستخدام اليدوي", d:"يفتح صفحة الدليل الرسمية لأي أمر: شرح كل خيار وأمثلة. اضغط / ثم اكتب كلمة للبحث داخل الدليل، و q للخروج. من يتقن man يستغني عن نصف بحث جوجل.", x:"man grep"},
+    {c:"history", f:"سجل الأوامر المنفذة", d:"يعرض آخر الأوامر التي نفذت في الطرفية بأرقامها. له قيمة تحقيقية مباشرة: يكشف ماذا جرى على النظام قبل بلاغ الحادث. مع tail يعرض آخر 20 أمراً فقط.", x:"history | tail -20"},
+    {c:"which", f:"تحديد مسار البرنامج المنفذ", d:"يعرض المسار الكامل للملف التنفيذي الذي سينفذه النظام فعلاً عند كتابة اسم البرنامج — مهم لكشف أدوات متنكرة أو مكررة في مسارات مختلفة.", x:"which python3"},
+    {c:"whereis", f:"تحديد كل ملفات البرنامج", d:"وسّع which: يعرض مسار التنفيذ وصفحات man والملفات المصدرية للبرنامج دفعة واحدة.", x:"whereis sshd"},
+    {c:"echo", f:"طباعة نص أو متغير بيئة", d:"يطبع نصاً أو قيمة متغير (مثل echo $HOME لدليلك الرئيسي)، ويستخدم أيضاً لإلحاق سطر بملف عبر >> بدون فتح محرر — لتوثيق ملاحظات التحقيق سريعاً.", x:"echo $HOME"},
+    {c:"clear", f:"تنظيف شاشة الطرفية", d:"يمسح محتوى الشاشة ويعيد المؤشر للأعلى. اختصاره الأسرع Ctrl+L. يبدو بسيطاً لكن النظرة النظيفة تقلل الأخطاء البصرية أثناء التحقيق الطويل.", x:"clear"}
+  ]
+},
+{
+  num:"02", code:"READ", color:"#4ade80",
+  title:"قراءة الملفات والسجلات",
+  desc:"90% من عمل SOC هو قراءة نصوص: سجلات، إعدادات، مخرجات. من يتقن القراءة يتقن التحليل.",
+  cmds:[
+    {c:"cat", f:"طباعة ملف كاملاً", d:"يعرض محتوى الملف بالكامل دفعة واحدة، ويناسب الملفات القصيرة فقط لأن الملف الكبير سيجرف الشاشة. يمكنه أيضاً دمج عدة ملفات: cat file1 file2.", x:"cat /etc/os-release"},
+    {c:"less", f:"تصفح ملف كبير صفحة صفحة", d:"القارئ التفاعلي للملفات الضخمة واللوجات: اضغط / ثم كلمة للبحث، و G للقفز للنهاية، و g للبداية، و q للخروج. الأداة الافتراضية لقراءة أي سجل يزيد عن شاشة.", x:"less /var/log/syslog"},
+    {c:"head", f:"عرض أول أسطر الملف", d:"يطبع أول 10 أسطر افتراضياً، ويتغير العدد بـ -n. مثالي لمعاينة بنية ملف لوج غريب قبل فتحه بالكامل: تعرف صيغة الحقول من أول نظرة.", x:"head -n 20 /var/log/auth.log"},
+    {c:"tail", f:"عرض آخر أسطر الملف", d:"يطبع آخر 10 أسطر افتراضياً، و -n 100 يعرض مئة. هو نافذتك على نهاية اللوج: آخر الأحداث هي الأحدث، وفيها تجد أثر الحادث الجاري.", x:"tail -n 50 /var/log/auth.log"},
+    {c:"tail -f", f:"المتابعة الحية للسجل", d:"يفتح الملف عند نهايته ويبقى معلقاً يعرض كل سطر جديد لحظة كتابته. مهارة أساسية لأي محلل: مراقبة اللوج وهو يتدفق أثناء هجوم حقيقي أو أثناء إعادة إنتاج مشكلة.", x:"tail -f /var/log/auth.log"},
+    {c:"wc", f:"عدّ الأسطر والكلمات والأحرف", d:"يحسب: -l للأسطر، و -w للكلمات، و -c للأحرف. أساس القياس الكمي: كم محاولة فشل؟ كم سطراً يطابق النمط؟", x:"wc -l /var/log/auth.log"},
+    {c:"file", f:"كشف النوع الحقيقي للملف", d:"يحدد طبيعة الملف من محتواه لا من امتداده: نص؟ تنفيذي؟ مضغوط؟ صورة؟ الفحص الأول لأي ملف مشبوه، لأن المهاجمين يتنكرون بامتدادات كاذبة (مثل malware.pdf وهو فعلاً تنفيذي).", x:"file invoice.pdf"},
+    {c:"stat", f:"البيانات الوصفية الدقيقة للملف", d:"أعمق من ls -l: يعرض الحجم والأذونات وثلاثة طوابع زمنية — آخر وصول (Access) وآخر تعديل (Modify) وآمر التغيير (Change). في التحقيقات، تعارض الطوابع الزمنية بحد ذاته دليل.", x:"stat /etc/passwd"},
+    {c:"diff", f:"مقارنة ملفين سطراً بسطر", d:"يعرض الفروقات بين نسختين من ملف. استخدمه لمقارنة إعداد نظام حساس بنسخة أصلية موثوقة لتكتشف أي تعديل خبيث بضبط سطري.", x:"diff sshd_config.known sshd_config"}
+  ]
+},
+{
+  num:"03", code:"FILE", color:"#2dd4bf",
+  title:"إنشاء الملفات وتعديلها",
+  desc:"توثيق التحقيق، أخذ النسخ، وعزل العينات — مهارات اليد التي لا يكتمل بدونها محلل.",
+  cmds:[
+    {c:"touch", f:"إنشاء ملف فارغ / تحديث طابعه الزمني", d:"ينشئ ملفاً فارغاً، لكنه أيضاً يحدّث وقت آخر تعديل لملف موجود دون تغيير محتواه — وهي الحيلة نفسها التي يستخدمها المهاجمون لتضليل التحقيقات، لذا افهم الوجهين.", x:"touch notes.txt"},
+    {c:"mkdir", f:"إنشاء مجلد", d:"ينشئ مجلداً جديداً، والخيار -p ينشئ المسار الكامل بمجلداته الأم دفعة واحدة — طريقة تنظيم أدلة الحوادث المعتمدة في أي مركز عمليات.", x:"mkdir -p cases/INC-047/evidence"},
+    {c:"cp", f:"نسخ ملفات ومجلدات", d:"ينسخ ملفاً، و -r لمجلد كامل، و -a ينسخ مع كل الخصائص والطوابع الزمنية. أول خطوة في الاستجابة: خذ نسخة من الدليل الرقمي قبل أن تلمسه.", x:"cp -a /var/log /mnt/inc047/"},
+    {c:"mv", f:"نقل أو إعادة تسمية", d:"ينقل ملفاً لمسار جديد أو يعيد تسميته بنفس الأمر — لاحظ أن النقل بين الأقراص هو نسخ ثم حذف، وبين مجلدات نفس القرص لحظي.", x:"mv suspects.txt IOCs.txt"},
+    {c:"rm", f:"حذف نهائي", d:"يحذف الملفات نهائياً بلا سلة مهملات: -r للمجلدات و -f بلا تأكيد. استخدمه بوعي كامل، فسطر واحد خاطئ يمسح دليلاً كاملاً. وفي التحقيق: لا تحذف شيئاً قبل توثيقه.", x:"rm old_report.txt"},
+    {c:"ln -s", f:"إنشاء رابط رمزي (Symlink)", d:"ينشئ اختصاراً يشير لملف آخر. المهاجمون يستخدمون الروابط الرمزية للتمويه (ملف يبدو بريئاً وهو باب لغيره)، لذا يجب أن تعرف كيف تقرأها في مخرجات ls -l.", x:"ln -s /opt/tools/scan.sh /usr/local/bin/scan"},
+    {c:"nano", f:"محرر النصوص السهل", d:"محرر للمبتدئين بواجهة واضحة وأوامره مكتوبة أسفل الشاشة: Ctrl+O للحفظ و Ctrl+X للخروج. كافٍ تماماً لتحرير ملاحظاتك وملفات الإعدادات البسيطة.", x:"nano notes.txt"},
+    {c:"vim", f:"محرر النصوص الاحترافي", d:"المحرر الذي تجده على كل خادم لينكس تقريباً افتراضياً. نمطان: اضغط i للإدراج، و Esc للعودة للأوامر، ثم :wq للحفظ والخروج و :q! للخروج دون حفظ. تعلمه لأنه قد يكون المتاح الوحيد على خادم الإنتاج.", x:"vim notes.txt"},
+    {c:"tar", f:"الأرشفة والضغط", d:"يجمع ملفات ومجلدات في أرشيف واحد ويضغطه: -czf لإنشاء أرشيف .tar.gz، و -xzf للاستخراج، و -tzf لعرض المحتوى دون فكه. الحزمة المعيارية لتجميع الأدلة ونقلها.", x:"tar -czf evidence.tar.gz /var/log"}
+  ]
+},
+{
+  num:"04", code:"SRCH", color:"#fbbf24",
+  title:"البحث — عمود فقري التحقيقات",
+  desc:"التحقيق الرقمي كله سؤال واحد بصياغات مختلفة: أين يوجد الدليل؟ والإجابة دائماً بأوامر البحث.",
+  cmds:[
+    {c:"find", f:"بحث الملفات الأقوى في لينكس", d:"يبحث عن ملفات حقيقيًا على القرص بشروط متعددة: -name بالاسم، و -size بالحجم، و -type بالنوع، و -mtime بوقت آخر تعديل، و -perm بالصلاحيات، وينفذ أمراً على كل نتيجة عبر -exec. سلاح التحقيقات الأول.", x:"find / -name \"*.log\" -mtime -1 2>/dev/null"},
+    {c:"locate", f:"بحث فوري من فهرس جاهز", d:"يجد المسارات في أجزاء من الثانية لأنه يبحث في قاعدة بيانات مفهرسة مسبقاً (تحدثها updatedb) بدل مسح القرص. أسرع من find لكنه قد يفوّت الملفات الحديثة جداً.", x:"locate auth.log"},
+    {c:"grep", f:"البحث عن أنماط داخل النصوص", d:"أكثر أمر ستستخدمه في مسار SOC: يبحث عن نمط داخل ملف أو مخرجات أي أمر. -i يتجاهل حالة الأحرف، و -v يستثني المطابقات، و -n يعرض أرقام الأسطر، و -r بحث تكراري في مجلد، و -c يعدّ المطابقات، و -E يفعل التعبيرات النمطية الموسعة، و -C 3 يعرض الأسطر المحيطة بالسياق.", x:"grep -in \"failed password\" /var/log/auth.log"},
+    {c:"grep -E", f:"الصيد بالتعبيرات النمطية", d:"نسخة grep بذراع الـ Regex الموسعة: صِغ نمطاً واحداً يطابق عدة صور مثل (Failed|Invalid) للإمساك بكل صيغ رسالة الفشل دفعة واحدة، أو نمط عنوان IP كامل.", x:"grep -E \"(Failed|Invalid) password\" /var/log/auth.log"},
+    {c:"find -exec", f:"نفّذ أمراً على كل نتيجة بحث", d:"امتداد find الذي يحول النتائج إلى فعل: لكل ملف يجده ينفذ الأمر الذي تحدده — مثل بحث داخل كل ملف وجد. يُكتب كـ {} بديلاً عن الملف و \\; لإنهاء الأمر.", x:"find /var/log -name \"*.gz\" -exec zgrep \"error\" {} +"}
+  ]
+},
+{
+  num:"05", code:"TEXT", color:"#a78bfa",
+  title:"معالجة النصوص وتصفيتها",
+  desc:"الأنابيب (Pipes) هي الترس المركزي في آلة التحليل: خذ، صفِّ، استخرج، رتّب، عُدّ.",
+  cmds:[
+    {c:"awk", f:"استخراج الأعمدة والحقول", d:"يفصل كل سطر لحقول ويتعامل معها كأعمدة: $1 الحقل الأول و $2 الثاني وهكذا. في لوج الويب، سطر واحد + awk يعطيك عمود عناوين IP كاملاً — أدوات الجداول النصية الحقيقية.", x:"awk '{print $1}' /var/log/nginx/access.log"},
+    {c:"sed", f:"البحث والاستبدال داخل التدفق", d:"محرر التيار: يستبدل أنماطاً بغيرها (s/old/new/g)، ويعرض مدى أسطر محدداً (-n مع p)، ويحذف أسطراً مطابقة (d). يستخدم لتنظيف المخرجات الخام قبل تغذيتها لأداة أخرى.", x:"sed -n 10,25p /var/log/syslog"},
+    {c:"cut", f:"قص أعمدة بمحدد", d:"بديل أخف من awk للفصل البسيط: -d يحدد المحدد (مثل النقطتين) و -f رقم الحقل المطلوب. مثالها الكلاسيكي: سرد أسماء كل الحسابات من ملف passwd.", x:"cut -d: -f1 /etc/passwd"},
+    {c:"sort", f:"ترتيب النتائج", d:"يرتب الأسطر هجائياً افتراضياً، و -n رقمياً، و -r عكسياً من الأكبر، و -u يحذف المكرر. خطوة إجبارية قبل uniq لأن التكرار لا يُحسب إلا على الأسطر المتجاورة.", x:"sort -u iocs.txt"},
+    {c:"uniq -c", f:"عدّ المكررات", d:"يحذف الأسطر المكررة المتتالية، ومع -c يضع عدّاد مرات التكرار أمام كل سطر — نجم إحصاءات اللوج: أي IP تكرر أكثر؟ أي صفحة زُورت أكثر؟", x:"awk '{print $1}' access.log | sort | uniq -c | sort -rn | head"},
+    {c:"tr", f:"تحويل وحذف المحارف", d:"يستبدل محرفاً بمحرف آخر عبر التيار (مثل تحويل صغير لكبير) أو يحذفه بـ -d. مفيد لتنظيف مخرجات مليئة برموز زائدة قبل المعالجة.", x:"echo soc | tr a-z A-Z"},
+    {c:"tee", f:"عرض وحفظ في نفس الوقت", d:"يتفرع بالمخرجات: تعرض على الشاشة وتُحفظ في ملف معاً — لتوثيق خطوات التحقيق أثناء تنفيذها مباشرة دون فقدان الرؤية الحية.", x:"ss -tupln | tee open_ports.txt"},
+    {c:"xargs", f:"تمرير النتائج وسائط لأمر آخر", d:"يأخذ مخرجات أمر (أسطراً) ويمررها وسائط لأمر تالٍ. حلقة الوصل التي تصنع أنابيب ثلاثية: وجد الملفات ثم ابحث داخلها ثم نفّذ شيئاً على النتائج.", x:"cat iocs.txt | xargs -I{} grep {} /var/log/syslog"}
+  ]
+}
+);
+CORE.push(
+{
+  num:"06", code:"PRM", color:"#fb7185",
+  title:"الصلاحيات والمستخدمون",
+  desc:"نموذج الأمان في لينكس كله مبني على: من يملك ماذا، ومن يستطيع فعل ماذا — افهمه تفهم نصف الاختراقات.",
+  cmds:[
+    {c:"sudo", f:"التنفيذ بصلاحيات الجذر", d:"ينفذ أمراً بصلاحيات مدير النظام بعد التحقق من صلاحياتك. كل استخدام له يوثَّق في auth.log مع اسم المستخدم والأمر — سجلاً ذهبياً يكشف أي استغلال للامتيازات.", x:"sudo tail /var/log/auth.log"},
+    {c:"su -", f:"تبديل المستخدم بالكامل", d:"يبدّل جلستك بالكامل لحساب آخر مع بيئته ومتغيراته (بهذا المعنى الشرطة). الفرق الجوهري: sudo ينفذ أمراً واحداً بامتياز، و su يفتح جلسة كاملة بحساب آخر.", x:"su - analyst"},
+    {c:"chmod", f:"تعديل صلاحيات الملف", d:"يغير أذونات القراءة (r=4) والكتابة (w=2) والتنفيذ (x=1) للمالك والمجموعة والآخرين: 755 تنفيذي عام، و 600 ملف سري لمالكه وحده. اكتشاف ملف 777 في مكان حساس إنذار صريح.", x:"chmod 600 secret.txt"},
+    {c:"chown", f:"تغيير مالك الملف", d:"ينقل ملكية ملف أو مجلد لمستخدم ومجموعة محددين. راقب أي تغيير غير مبرر لملكية ملفات النظام — مؤشر ترويج امتيازات كلاسيكي.", x:"sudo chown analyst:soc report.txt"},
+    {c:"umask", f:"قناع الصلاحيات الافتراضية", d:"يحدد ما يُسحب تلقائياً من صلاحيات أي ملف جديد: umask 022 يعني أن ملفاً جديداً يولد بلا كتابة للآخرين. قناع متساهل يعني ملفات حساسة تولد مكشوفة.", x:"umask"},
+    {c:"useradd", f:"إنشاء مستخدم جديد", d:"ينشئ حساباً: -m ينشئ مجلده الرئيسي، و -s يحدد الصدفة الافتراضية، و -e يحدد تاريخ انتهاء. حساب جديد غامض على خادم إنتاج = أول أسئلة التحقيق.", x:"sudo useradd -m -s /bin/bash monitor"},
+    {c:"usermod", f:"تعديل حساب مستخدم", d:"يعدل خصائص الحسابات: -L يقفل الحساب فوراً، و -aG يضيفه لمجموعة إضافية، و -s يغير صدفته. أداتك للاحتواء (قفل مشبوه) ولبناء حسابات المراقبة.", x:"sudo usermod -aG soc analyst"},
+    {c:"passwd", f:"إدارة كلمات المرور", d:"يغير كلمة مرور حساب (نفسه أو غيره بصلاحيات)، و -l يقفل الحساب، و -u يفك قفله، و -S يعرض حالة كلمة المرور: مقفلة؟ فارغة؟ صالحة؟", x:"sudo passwd -S suspect"},
+    {c:"id", f:"هوية المستخدم وصلاحياته", d:"يعرض UID و GID وكل المجموعات التي ينتمي إليها المستخدم — أول سؤال في أي تحقيق حساب: من هذا فعلياً وماذا يستطيع الوصول إليه؟", x:"id analyst"},
+    {c:"whoami", f:"اسم الحساب الحالي", d:"يطبع اسم الحساب الذي تعمل به الآن. بسيط وحاسم: قبل تنفيذ أمر خطير، تأكد من هويتك الحالية أولاً.", x:"whoami"},
+    {c:"groups", f:"عضويات المستخدم في المجموعات", d:"يسرد مجموعات المستخدم — والعضوية في مجموعة sudo أو wheel تعني قدرة كاملة على أخذ صلاحيات الجذر. حاسبها دائماً عند مراجعة حساب جديد.", x:"groups analyst"}
+  ]
+},
+{
+  num:"07", code:"PROC", color:"#22d3ee",
+  title:"العمليات والخدمات",
+  desc:"كل حمولة خبيثة تصبح عملية حية — وهنا تبدأ مطاردتها: من أنت؟ من أطلقك؟ وماذا تفتح؟",
+  cmds:[
+    {c:"ps aux", f:"لقطة كل العمليات الجارية", d:"يعرض جميع العمليات لكل المستخدمين بتفاصيلها: المستخدم، PID، استهلاك المعالج والذاكرة، وقت البدء، وسطر الأمر. أضف f لترى شجرة العلاقات بين العمليات.", x:"ps aux | grep -i sshd"},
+    {c:"top", f:"مراقبة حية للموارد", d:"شاشة تفاعلية تتحدث كل ثوانٍ: ترتيب العمليات حسب استهلاك المعالج والذاكرة مع إجماليات النظام. غرفة القيادة عند الاشتباه بحمولة تعدين تشغل الخادم.", x:"top"},
+    {c:"htop", f:"مراقبة محسّنة بواجهة أوضح", d:"نسخة top بأشرطة ملونة وتصفح بالأسهم وفرز بنقرة وعمليات قتل مباشرة. مريحة جداً، لكنها غير مثبتة افتراضياً في كل التوزيعات — فأتقن top أولاً.", x:"htop"},
+    {c:"kill", f:"إنهاء عملية بمعرفها PID", d:"يرسل إشارة لعملية برقمها: الإشارة الافتراضية 15 (TERM) تطلب إنهاءً نظيفاً، و -9 (KILL) قتل قسري فوري عندما ترفض العملية الاستجابة — وهي آخر خيار لا أوله.", x:"kill -9 4321"},
+    {c:"pkill", f:"إنهاء العمليات بالاسم", d:"يقتل العمليات بنمط اسم مباشرة دون البحث عن PID يدوياً. الخيار -f يطابق سطر الأمر كاملاً لا الاسم فقط — أدق وأخطر، فاستخدمه بتحديد.", x:"pkill -f miner.sh"},
+    {c:"killall", f:"إنهاء كل العمليات باسم محدد", d:"يرسل الإشارة لكل العملية التي تحمل الاسم المعطى دفعة واحدة — مفيد لإسكات جيش نسخ متطابرة من عملية واحدة.", x:"killall nc"},
+    {c:"pstree", f:"شجرة العمليات الهرمية", d:"يعرض العمليات ببنية الأب والابن، فيكشف فوراً العملية التي أطلقتها أخرى — مثل صدفة ويب سيرفر أنجبت عملية غريبة: علاقة أبوة غير منطقية تعني اختراقاً.", x:"pstree -p"},
+    {c:"jobs", f:"إدارة مهام الطرفية", d:"يسرد المهام المعلقة والخلفية لجلستك، و fg يعيد مهمة للواجهة الأمامية، و bg يكملها في الخلفية. أساس إدارة أدوات طويلة التشغيل مثل الالتقاط الشبكي.", x:"jobs"},
+    {c:"systemctl", f:"إدارة خدمات systemd", d:"بوابة التحكم بالخدمات: status لحالة خدمة، و start و stop للتشغيل والإيقاف، و enable و disable للتشغيل عند الإقلاع، و list-units لكل الوحدات. فحص الخدمات المشبوهة يبدأ من هنا.", x:"systemctl status sshd"},
+    {c:"journalctl", f:"سجلات الخدمات المركزية", d:"يستعلم سجلات systemd كلها: -u لخدمة محددة، و --since بنافذة زمنية، و -f للمتابعة الحية، و -b لآخر إقلاع. مركز أرشيف موحد بدل التنقل بين ملفات متفرقة.", x:"journalctl -u ssh --since -2h"}
+  ]
+},
+{
+  num:"08", code:"NET", color:"#4ade80",
+  title:"أساسيات الشبكة",
+  desc:"الاتصال الشبكي هو الطريق الذي يصل المهاجم بحمولته — وأنت من يراقب الطريق.",
+  cmds:[
+    {c:"ip a", f:"عرض الواجهات والعناوين", d:"الأداة الحديثة لإدارة الشبكة: a يعرض الواجهات وعناوين IP، و route يعرض جدول التوجيه، و neigh يعرض جدول ARP. أول أوامر تهيئة أي جهاز لينكس.", x:"ip a"},
+    {c:"ping", f:"اختبار الوصولية والزمن", d:"يرسل حزم ICMP لجهاز هدف لقياس الوصول وزمن الاستجابة وفقدان الحزم. في التحقيق يفيد لاختبار: هل هذا المضيف المشبوه حي؟ وهل خادمنا يصل للإنترنت؟", x:"ping -c 3 8.8.8.8"},
+    {c:"ss -tupln", f:"المنافذ المفتوحة والمنصِتة", d:"البديل الحديث عن netstat: يعرض كل المقابس — t لـ TCP و u لـ UDP و p بالعملية صاحبة المنفذ و l للمنصت فقط و n بأرقام لا أسماء. أول مسح داخلي في أي تحقيق.", x:"sudo ss -tupln"},
+    {c:"netstat -antup", f:"إحصاءات الشبكة الكلاسيكية", d:"الأداة الأقدم لنفس غرض ss، وستجدها على أنظمة قديمة كثيرة: a كل المقابس، n رقمياً، t و u للبروتوكولين، p بالعمليات. اتقن الاثنتين لأنك لا تختار نظام الضحية.", x:"netstat -antup"},
+    {c:"lsof -i", f:"من يملك هذا المنفذ؟", d:"يسرد الملفات المفتوحة، ومع -i يعرض العمليات التي تملك منافذ أو اتصالات شبكية. عند رؤية منفذ غريب في ss، هذا الأمر يجيب: أي عملية وخلفها أي ملف تنفيذي؟", x:"sudo lsof -i :4444"},
+    {c:"curl", f:"طلبات HTTP من الطرفية", d:"يرسل طلبات ويب ويعرض الترويسات (-I) والمحتوى، ويحمّل ملفات بـ -o. للفحص الآمن لروابط IOC (بترويسات فقط دون تنفيذ) ولجلب التحديثات والقوائم.", x:"curl -I https://example.com"},
+    {c:"wget", f:"تحميل الملفات عبر الشبكة", d:"ينزل ملفات عبر HTTP/HTTPS/FTP بمعاودة تلقائية عند الانقطاع. لجلب قواعد يارا وقوائم IOC وأدوات الفحص — وانتبه: لا تحمّل عينات من أنظمة الإنتاج.", x:"wget https://example.com/rules.yar"},
+    {c:"dig", f:"استعلام DNS التفصيلي", d:"يستعلم خوادم الاسم بمرونة كاملة: يكشف عنوان IP لنطاق وسجلاته (A و MX و TXT و NS) وخادمه الأصيل. أساس تحليل أي نطاق أو رابط مشبوه يصلك في تنبيه.", x:"dig +short suspicious.domain"},
+    {c:"ssh", f:"الدخول المشفر لخادم بعيد", d:"يفتح قناة طرفية مشفرة لخادم آخر بكلمة مرور أو مفتاح (الخيار الأفضل). بوابتك اليومية لخوادم اللوجات وأجهزة التحليل — ومراقبة جلساته في auth.log جزء أساسي من الصيد.", x:"ssh analyst@10.0.0.5"},
+    {c:"scp", f:"نسخ ملفات عبر SSH", d:"ينسخ ملفات بين جهازك وخادم بعيد عبر نفس القناة المشفرة — الطريقة القياسية لسحب الأدلة من خادم مصاب إلى محطة التحليل.", x:"scp evidence.tar.gz analyst@10.0.0.5:~/INC-047/"}
+  ]
+},
+{
+  num:"09", code:"SYS", color:"#fbbf24",
+  title:"النظام والتخزين والضغط",
+  desc:"حالة الجهاز الصحية ليست فضولاً: قرص ممتلئ يوقف اللوج، وذاكرة مستنزفة تخفي التعدين.",
+  cmds:[
+    {c:"uname -a", f:"هوية النظام والنواة", d:"يعرض اسم النظام وإصدار النواة والمعمارية — أول معلومة تحتاجها لمعرفة أي نظام تتعامل معه وأي ثغرات نواة تنطبق عليه.", x:"uname -a"},
+    {c:"hostname", f:"اسم الجهاز", d:"يطبع (أو يعين بصلاحيات) اسم المضيف — تحدد به مصدر اللوج بسرعة في بيئة مئات الخوادم، وهو ما يميز أحداث جهاز عن آخر في السِجِل المركزي.", x:"hostname"},
+    {c:"df -h", f:"المساحة الحرة على الأقراص", d:"يعرض استخدام كل قسم من أقسام التخزين بأحجام مقروءة. امتلاء قسم /var يوقف تسجيل اللوجات فجأة — ثغرة صامتة يفتش عنها المهاجم الذكي.", x:"df -h"},
+    {c:"du -sh", f:"حجم كل مجلد فعلياً", d:"يحسب الحجم الفعلي للمجلدات وملفاتها: du -sh /var/log/* يقارن حجم كل ملف سجل على حدة — انتفاخ غير طبيعي في ملف واحد يدل على نشاط مفاجئ أو تخزين بيانات مسروقة.", x:"du -sh /var/log/* | sort -rh | head"},
+    {c:"free -h", f:"استهلاك الذاكرة والتبديل", d:"يعرض الرام المستخدمة والمتبقية ومساحة السواب (Swap). استنزاف مفاجئ للذاكرة مع معالج مشغول مؤشر شائع على تعدين عملات أو تشفير فدية جارية.", x:"free -h"},
+    {c:"uptime", f:"زمن التشغيل وحمل النظام", d:"يعرض منذ متى النظام يعمل ومتوسطات الحمل لآخر دقائق. إعادة تشغيل غامضة في منتصف الليل تسأل عن نفسها: من أعادها ولماذا؟", x:"uptime"},
+    {c:"date", f:"وقت النظام الحالي", d:"يطبع تاريخ ووقت النظام — ومرجعك الدائم لمزامنة الأحداث: بلا ساعة موحدة بين الأنظمة تفقد القدرة على ربط أحداث سجلات متعددة في خط زمني واحد.", x:"date"},
+    {c:"gzip / gunzip", f:"ضغط وفك ملفات .gz", d:"يضغط ملفاً واحداً بامتداد .gz أو يفك ضغطه؛ والخيار -k يبقي الأصل. ملفات اللوجات المدورة على الأنظمة تكون غالباً بهذه الصيغة، وقراءتها تكون عبر zcat و zgrep.", x:"gunzip -k auth.log.2.gz"},
+    {c:"zip / unzip", f:"أرشيفات Zip", d:"ينشئ ويستخرج أرشيفات zip الشائعة في تبادل الملفات — بما فيها مرفقات التصيّد. فك ضغط ملف مشبوه يحدث في بيئة معزولة دائماً لا على جهازك.", x:"unzip submission.zip -d sample/"}
+  ]
+}
+);
+const SOC = [];
+SOC.push(
+{
+  num:"A", code:"LOGMAP", color:"#22d3ee",
+  title:"خريطة السجلات — أين الدليل؟",
+  desc:"قبل أي أمر: اعرف أين تُخزن الأحداث. هذه أشهر مسارات السجلات على توزيعات لينكس — احفظها كخريطة كنز.",
+  cmds:[
+    {c:"/var/log/auth.log", f:"سجل المصادقة (Debian/Ubuntu)", d:"كل أحداث المصادقة على توزيعات ديبيان وأوبونتو: جلسات SSH الناجحة والفاشلة، واستخدام sudo، وسحب وإضافة الحسابات. أول ملف تفتحه عند أي بلاغ اختراق.", x:"sudo less /var/log/auth.log"},
+    {c:"/var/log/secure", f:"سجل المصادقة (RHEL/CentOS)", d:"الملف المقابل لـ auth.log على أنظمة ريدهات وسنتوس وفيدورا — نفس الأحداث بمسمى مختلف. حدد عائلة التوزيعة أولاً ثم اعرف مكان الدليل.", x:"sudo grep -i \"failure\" /var/log/secure"},
+    {c:"/var/log/syslog", f:"السجل العام (Debian/Ubuntu)", d:"مصبّب أحداث النظام المركزي لمعظم الخدمات على ديبيان وأوبونتو. تجد فيه ما لا يجد له ملفاً خاصاً — من رسائل كرون إلى أخطاء الخدمات.", x:"less /var/log/syslog"},
+    {c:"/var/log/messages", f:"السجل العام (RHEL)", d:"المقابل لـ syslog على عائلة ريدهات. نفس الفكرة: كل ما ليس له ملف مخصص يهبط هنا.", x:"tail -f /var/log/messages"},
+    {c:"/var/log/nginx/access.log", f:"سجل طلبات الويب", d:"كل طلب HTTP يصل لخادم الويب مع IP المصدر والطالب والكود والزمن — سواء نغينكس أو أباتشي (apache2). ميدان صيد هجمات الويب: تصنّد وحقن ورفع ملفات.", x:"tail -f /var/log/nginx/access.log"},
+    {c:"/var/log/kern.log", f:"سجل النواة", d:"رسائل نواة النظام مباشرة: أخطاء التعريفات، وأنشطة جدار الحماية على مستوى النواة. قريبه الفوري dmesg الذي يقرأ عازلة النواة الحية.", x:"sudo tail /var/log/kern.log"},
+    {c:"/var/log/cron", f:"سجل المهام المجدولة", d:"توثيق كل مهمة cron نُفذت ومتى — ملف كشف آليات الاستمرار (Persistence) المبنية على جدولة المهام.", x:"grep root /var/log/cron"},
+    {c:"/var/log/wtmp · btmp", f:"سجلا الدخول الثنائيان", d:"wtmp يخزن جلسات الدخول الناجحة و btmp الفاشلة — وهي ملفات ثنائية لا تُقرأ بـ cat بل بأوامر last و lastb المصممة لها خصيصاً.", x:"sudo lastb | head -30"}
+  ]
+},
+{
+  num:"B", code:"LOGHUNT", color:"#4ade80",
+  title:"تحليل السجلات — عصر الدليل",
+  desc:"أوامر تحويل ملايين الأسطر الخام إلى إجابات: من حاول؟ كم مرة؟ ومتى تحديداً؟",
+  cmds:[
+    {c:"journalctl --since", f:"استعلام بجدار زمني", d:"يقص أحداث systemd لنافذة زمنية محددة — أول خطوة في أي تحقيق: حصر نافذة الحادث ثم البحث داخلها فقط بدل الغرق في سجل كامل.", x:"journalctl --since \"2026-11-19 09:00\" --until \"2026-11-19 10:00\""},
+    {c:"zgrep", f:"بحث داخل لوجات مضغوطة", d:"يبحث داخل ملفات .gz المضغوطة دون فكها. اللوجات المدورة القديمة تكون مضغوطة دائماً — لذا يفشل من يبحث بـ grep العادي عن أثر عمره أكثر من دورة تدوير.", x:"zgrep \"Failed password\" /var/log/auth.log.*.gz"},
+    {c:"zcat", f:"قراءة لوج مضغوط كأنه نص", d:"يفك ضغط الملف إلى تيار مباشر يمكن تمريره للأنابيب — مزيج zcat مع grep و awk هو التعامل القياسي مع الأرشيف التاريخي للسجلات.", x:"zcat auth.log.2.gz | grep sshd"},
+    {c:"grep -c", f:"قياس حجم الحدث بالعدّ", d:"بدل عرض المطابقات، يرجع عددها فقط: كم محاولة فشل؟ كم بلوك مُنشأ؟ رقم واحد يحول التصفح إلى قياس كَمّي يوثَّق في التقرير.", x:"grep -c \"Failed password\" /var/log/auth.log"},
+    {c:"grep -C", f:"رؤية سياق الحدث", d:"يعرض الأسطر المحيطة بالمطابقة: -B 2 ما قبلها و -A 5 ما بعدها و -C n الاثنين. السطر وحده لا يعني شيئاً؛ القصة فيما حوله: ماذا حدث قبل الدخول الناجح بدقيقة؟", x:"grep -C 3 \"Accepted password\" /var/log/auth.log"},
+    {c:"last", f:"سجل الدخول الناجح", d:"يقرأ wtmp ويعرض الجلسات السابقة والحالية: من دخل، ومن أي IP، ومتى، وإلى متى بقي. أول مسح زمني لبصمة المهاجم على النظام.", x:"last -20"},
+    {c:"lastb", f:"سجل محاولات الدخول الفاشلة", d:"يقرأ btmp ويعرض كل محاولة دخول فاشلة مع مصدرها — كاشف هجمات تخمين كلمات المرور (Brute Force) ومسحها الأول في البلاغات.", x:"sudo lastb | head -30"},
+    {c:"lastlog", f:"آخر دخول لكل حساب دفعة واحدة", d:"يلخص آخر تسجيل دخول لكل حساب في النظام بجدول واحد — يكشف بسرعة الحسابات الخاملة منذ سنين التي استيقظت فجأة الأسبوع الماضي.", x:"lastlog | grep -v \"Never\""},
+    {c:"ausearch", f:"استعلام سجلات auditd", d:"يبحث في سجلات نظام التدقيق auditd عن أحداث محددة بنوعها أو مستخدمها أو نطاقها الزمني — أدق طبقة تدقيق في لينكس وأنضج مصادر الـ Forensics فيه.", x:"sudo ausearch -m USER_LOGIN --start today"},
+    {c:"aureport", f:"تقارير تدقيق جاهزة", d:"يلخص سجلات auditd الضخمة في تقارير مرتبة: ملخص الدخول، الأوامر المنفذة، الملفات المتغيرة — مدخل سريع قبل الغوص في التفاصيل بـ ausearch.", x:"sudo aureport --login -i"},
+    {c:"logrotate", f:"خدمة دوَران السجلات", d:"ليست أمر تحليل بل آلية تدوير وضغط اللوجات القديمة وحذفها — لكن معرفتها شرط: لتعرف أين تختفي السجلات القديمة، وما نطاق المدة التي يغطيها كل ملف، ولماذا يبدو الدليل مفقوداً.", x:"cat /etc/logrotate.conf"}
+  ]
+},
+{
+  num:"C", code:"NETINT", color:"#fbbf24",
+  title:"تحليل الشبكة — مراقبة السلك",
+  desc:"من الطرفية نفسها: التقط، فك البروتوكولات، واستعلم البنية التحتية للنطاقات المشبوهة.",
+  cmds:[
+    {c:"tcpdump", f:"التقاط حزم الشبكة الخام", d:"يلتقط ويعرض الحزم مباشرة من البطاقة بفلاتر BSD دقيقة: مضيف محدد، منفذ، شبكة كاملة. عينك على السلك دون أي واجهة رسومية، مع -w للحفظ بصيغة pcap للتحليل اللاحق.", x:"sudo tcpdump -i eth0 host 10.0.0.7 -w capture.pcap"},
+    {c:"tshark", f:"محرك Wireshark نصياً", d:"نفس محرك تفكيك البروتوكولات في وايشارك لكن بطرفية قابلة للسكربتة: يقرأ ملفات pcap ويفلترها بعبارات display filters ويستخرج حقولاً محددة منها — للاستخراج الآلي وليس للتصفح البصري.", x:"tshark -r capture.pcap -Y \"http.request\""},
+    {c:"nmap", f:"فحص المنافذ والخدمات", d:"يكتشف المنافذ المفتوحة والخدمات وإصداراتها على هدف ما. في SOC تستخدمه للمطابقة: هل ما رصده ss على الخادم يجب أن يكون مكشوفاً؟ وللتحقق الدفاعي على أنظمتك المصرح لك بها فقط.", x:"sudo nmap -sV -p- 10.0.0.5"},
+    {c:"ip neigh", f:"جدول ARP للجهاز", d:"يعرض ربط عناوين IP بعناوين MAC في شبكتك المحلية — أداة كشف انتحال ARP (ARP Spoofing): عنوان MAC واحد يحمل عدة IP أو بوابة بجهازين مؤشر تنصت محتمل.", x:"ip neigh"},
+    {c:"host", f:"استعلام DNS خفيف", d:"يترجم اسم نطاق لعنوان IP والعكس (سجل PTR) بأسرع صورة ممكنة — سطر واحد لكل IOC أثناء الفرز السريع، وإن أردت التفصيل انتقل لـ dig.", x:"host suspicious.domain"},
+    {c:"nslookup", f:"استعلام DNS التفاعلي", d:"يستعلم خوادم الاسم بوضع تفاعلي، وميزته العملية: موجود على ويندوز أيضاً بنفس الصياغة — لغة مشتركة في بيئات مختلطة الأنظمة.", x:"nslookup suspicious.domain"},
+    {c:"whois", f:"بيانات تسجيل النطاق", d:"يعرض من سجل النطاق: جهة التسجيل وتاريخ الإنشاء وتاريخ الانتهاء وخوادم الأسماء. نطاق أُنشئ بالأمس القريب مؤشر تصيّد قوي جداً في تقييم الروابط.", x:"whois suspicious.domain"},
+    {c:"traceroute", f:"تتبع مسار الحزم", d:"يتتبع القفزات التي تعبرها الحزمة حتى وجهتها — لفهم أين يتوجه الاتصال المشبوه وفي أي نقطة يخرج من شبكتك.", x:"traceroute suspicious.domain"},
+    {c:"nc (netcat)", f:"المفك السويسري للشبكة", d:"يفتح اتصالاً خاماً بأي منفذ: فحص وصولية بـ -zv، وإرسال طلبات بدائية يدوياً. اعرفها جيداً لأنها أيضاً أداة المهاجمين المفضلة لبناء القنوات المرتدة — رؤيتها تعمل غريباً على خادمك إنذار بذاته.", x:"nc -zv 10.0.0.5 22"},
+    {c:"mtr", f:"تتبع حي بالقياس", d:"تدمج traceroute و ping في شاشة واحدة حية تتحدث مع كل قفزة: زمن الوصول والفقد لكل مرحلة — تشخيص أسرع لمشاكل المسار.", x:"mtr suspicious.domain"}
+  ]
+},
+{
+  num:"D", code:"PERSIST", color:"#fb7185",
+  title:"العمليات وآليات الاستمرار",
+  desc:"المهاجم يريد البقاء بعد إعادة التشغيل — وهنا تفحص كل مكان يمكن أن يزهر فيه من جديد.",
+  cmds:[
+    {c:"ps aux --sort=-%cpu", f:"ترتيب العمليات بالاستهلاك", d:"لقطة العمليات مرتبة من الأكثر التهاماً للمعالج أو الذاكرة (-%mem) — التوقيع السلوكي الشهير لحمولات التعدين: عملية مجهولة تلتهم 99% منذ فجر اليوم.", x:"ps aux --sort=-%cpu | head -10"},
+    {c:"ls -l /proc/PID/exe", f:"فحص العملية الحية من الداخل", d:"نظام ملفات /proc يكشف كل شيء عن عملية حية: exe يشير لملفها التنفيذي الفعلي، و cmdline لسطر أوامرها، و fd لملفاتها المفتوحة، و environ لمتغيرات بيئتها — تحقيق يدوي عميق بلا أدوات.", x:"ls -l /proc/4321/exe /proc/4321/fd"},
+    {c:"lsof -p", f:"كل ما فتحته عملية", d:"يسرد ملفات ومقابس ومكتبات العملية بالكامل — يكشف من أين تُشغّل الحمولة، وإلى أين تكتب بياناتها، ومع من تتصل.", x:"sudo lsof -p 4321"},
+    {c:"crontab -l -u", f:"مهام cron لمستخدم محدد", d:"يعرض المهام المجدولة للحساب المحدد — أول مكان تفتشه عن الاستمرار، فمهمة لصق واحد تعيد تنزيل الحمولة كل دقيقة حتى بعد حذفك لها يدوياً.", x:"sudo crontab -l -u www-data"},
+    {c:"ls /etc/cron*", f:"المهام المجدولة النظامية", d:"يشمل cron.d و cron.hourly و cron.daily و cron.weekly و cron.monthly — مسارات يفحصها المهاجم لزرع مهمة تعمل بصلاحيات النظام.", x:"ls -la /etc/cron.d /etc/cron.daily /etc/cron.deny"},
+    {c:"systemctl list-unit-files", f:"الخدمات الممكّنة عند الإقلاع", d:"قائمة كل وحدات النظام مع حالة تفعيلها — ابحث عن الخدمات الممكّنة التي لا تعرفها: خدمة غريبة باسم مقارب لاسم نظامي هي تنكر كلاسيكي.", x:"systemctl list-unit-files --state=enabled"},
+    {c:"atq", f:"المهام المؤجلة", d:"يعرض المهام المجدولة للتنفيذ مرة واحدة بأمر at — قناة استمرار أقل شهرة من cron لهذا تُنسى في الفحص، فيتيح للمهاجم أنه أكثر أماناً.", x:"atq"},
+    {c:"lsmod", f:"وحدات النواة المحملة", d:"يسرد وحدات النواة (Modules) المحملة حالياً — الـ Rootkits النواوية تعمل كوحدات محملة، فالوحدة الغريبة بلا حزمة تشرحها تستحق تحليلاً عميقاً.", x:"lsmod | head -30"},
+    {c:"w", f:"من على النظام الآن؟", d:"يعرض المستخدمين المتصلين حالياً بتفاصيلهم: من أي IP دخلوا، وعلى أي طرفية، وماذا ينفذون اللحظة — لقطة الوضع الحي عند وصول البلاغ.", x:"w"},
+    {c:"who -u", f:"الجلسات النشطة بمعرفاتها", d:"نسخة مركزة من w تعرض الجلسات النشطة مع أرقام معرفاتها (PID) وأوقات الدخول — لأخذ القرار السريع: من أُبعد ومن يبقى.", x:"who -u"}
+  ]
+}
+);
+SOC.push(
+{
+  num:"E", code:"IDENT", color:"#a78bfa",
+  title:"المستخدمون والمصادقة — تفكيك الهوية",
+  desc:"أي اختراق ينتهي بهوية: من دخل؟ بأي حساب؟ وماذا يستطيع هذا الحساب أن يفعل؟",
+  cmds:[
+    {c:"grep :0: /etc/passwd", f:"كشف حسابات بامتيازات جذر", d:"يفحص قاعدة الحسابات بحثاً عن أي حساب UID صفر — فهذا امتياز الجذر، ولا يفترض أن يملكه سوى root. حساب إضافي بصفر يعني باباً خلفياً صريحاً.", x:"awk -F: '$3==0 {print $1}' /etc/passwd"},
+    {c:"getent passwd", f:"إحضار الحسابات من كل المصادر", d:"يعرض الحسابات من الملفات المحلية ومن مصادر الشبكة (LDAP) معاً — أوسع من cat لـ passwd، ويكشف حسابات دخلت من دليل مركزي لا تظهر في الفحص المحلي البسيط.", x:"getent passwd | awk -F: '$3>=1000 {print $1}'"},
+    {c:"/etc/shadow", f:"تجزئات كلمات المرور", d:"يخزن تجزئات كلمات المرور بعيداً عن قراءة الجميع. افحصه للحسابات الفارغة (كلمة مرور غير موجودة أصلاً) — كل حساب بلا كلمة مرور باب مفتوح على مصراعيه.", x:"sudo awk -F: '($2==\"\"){print $1}' /etc/shadow"},
+    {c:"sudoers", f:"خريطة من يملك صلاحيات الجذر", d:"ملفا /etc/sudoers و sudoers.d/ يحددان من ينفذ ماذا بصلاحيات مدير النظام. حساب جديد ظهر هنا أو سطر ALL=(ALL) غير مبرر يعني امتيازاً كاملاً هُدِي للمهاجم.", x:"sudo cat /etc/sudoers /etc/sudoers.d/*"},
+    {c:"~/.bash_history", f:"سجل أوامر المستخدم السابقة", d:"ملف يوثق كل ما كتبه المستخدم في طرفيته — سيرته الذاتية الحقيقية. افحص تاريخ حساب مشبوه: تراه يحمّل أدوات ويفك أرشيفات ويعدّل إعدادات — قصة كاملة بأسطر.", x:"cat /home/suspect/.bash_history"},
+    {c:"faillog", f:"عدّاد فشل الدخول لكل حساب", d:"يعرض محاولات الفشل المتراكمة لكل حساب — يفرق بين هجوم موجه على حساب محدد وبين رشاش يرش الشبكة كلها عشوائياً.", x:"sudo faillog -a"},
+    {c:"authorized_keys", f:"مفاتيح SSH المسموح بها", d:"ملف يعرف من يدخل بحسابك بلا كلمة مرور عبر المفتاح العام. إضافة مفتاح إليه طريقة البقاء الأنظف والأشهر — ابحث عنه في كل مجلد رئيسي على النظام.", x:"find / -name authorized_keys 2>/dev/null -exec ls -la {} +"}
+  ]
+},
+{
+  num:"F", code:"MALWARE", color:"#f472b6",
+  title:"فحص الملفات والبرمجيات الخبيثة",
+  desc:"وصلك ملف مشبوه؟ لا تشغّله — افحصه من الخارج: نوعه، بصمته، نصوصه الداخلية.",
+  cmds:[
+    {c:"strings", f:"استخراج النصوص القابلة للقراءة", d:"يسحب كل السلاسل النصية من ملف تنفيذي مهما كانت صيغته — فتظهر روابط التحميل وعناوين خوادم التحكم (C2) وأوامر النظام المخبأة. أول عدسة على أي عينة.", x:"strings sample.bin | grep -iE \"http|curl|wget\""},
+    {c:"sha256sum", f:"البصمة الرقمية للملف", d:"يحسب التجزئة (Hash) الفريدة لمحتوى الملف — بصمة تطابقها مع قواعد IOC وقواعد يارا ومحركات الفحص مثل VirusTotal دون رفع الملف نفسه.", x:"sha256sum sample.bin"},
+    {c:"md5sum", f:"بصمة MD5 السريعة", d:"تجزئة أقصر وأسرع، وما زالت تستخدم في قوائم IOC القديمة كثيراً — لذا اعرفها، لكن اعتمد SHA-256 في التوثيق الرسمي لأنها أأمن ضد التصادم.", x:"md5sum sample.bin"},
+    {c:"base64 -d", f:"فك ترميز Base64", d:"يفك تشفير Base64 المنتشر في التصيّد والحمليات وإخفاء الحمولة — سطر واحد يحول سلسلة غامضة إلى أمرها الأصلي المقروء.", x:"echo \"bWFsd2FyZQ==\" | base64 -d"},
+    {c:"xxd", f:"التمثيل السداسي عشري", d:"يعرض الملف بايتات في أعمدة hex مع مقابلها المقروء — لرؤية ترويسة الملف الحقيقية (سحر البايتات الأولى يفضح النوع) والمقاطع المشفرة داخل العينة.", x:"xxd sample.bin | head -20"},
+    {c:"clamscan", f:"فحص بمحرك ClamAV مفتوح المصدر", d:"يفحص ملفاً أو مجلداً بقواعد ClamAV ويطبع النتائج — فحص أولي مجاني من الطرفية، مع --remove=no لضمان عدم حذف العينة قبل توثيقها.", x:"clamscan --remove=no sample.bin"}
+  ]
+},
+{
+  num:"G", code:"RESPOND", color:"#38bdf8",
+  title:"الاستجابة الأولية — الاحتواء",
+  desc:"بعد الاكتشاف يبدأ التوقيف: افصل الخطر، اقفل الباب، وثّب الدليل — بهذا الترتيب.",
+  cmds:[
+    {c:"iptables -A INPUT -s", f:"حجب عنوان مهاجم فوراً", d:"يضيف قاعدة لجدار الحماية تسقط كل حركة قادمة من عنوان IP محدد — إجراء الاحتواء الأسرع حين يُرصد مصدر هجوم نشط.", x:"sudo iptables -A INPUT -s 203.0.113.66 -j DROP"},
+    {c:"ufw deny", f:"حجب بجدار الحماية المبسط", d:"واجهة أسهل لقواعد الحماية على أوبونتو: deny from يحجب مصدراً بجملة واحدة، و status يعرض القواعد القائمة — لمن يفضّل البساطة على تعقيد iptables.", x:"sudo ufw deny from 203.0.113.66"},
+    {c:"usermod -L", f:"قفل حساب مشبوه", d:"يقفل الحساب فوراً (علامة تعجب أمام تجزئته) دون حذفه — توقف الباب وتحافظ على كل أدلته وملفاته للتحقيق اللاحق.", x:"sudo usermod -L suspect"},
+    {c:"systemctl stop --now", f:"إيقاف خدمة خبيثة فوراً", d:"يوقف الخدمة حالاً ويعطلها عن الإقلاع القادم دفعة واحدة (مع disable) — احتواء آلية الاستمرار الخدمية في خطوة واحدة.", x:"sudo systemctl disable --now suspicious.service"},
+    {c:"chattr +i", f:"تثبيت ملف ضد أي تعديل", d:"يمنع تعديل الملف أو حذفه حتى من الجذر نفسه — لتأمين ملف دليل من أي عبث أثناء التحقيق، ولا تنسَ فك التثبيت بـ chattr -i عند الانتهاء.", x:"sudo chattr +i evidence.log"},
+    {c:"umount + sync", f:"فصل أداة بأمان قبل النسخ", d:"sync يفرغ كل المخازن المؤقتة للقرص، ثم umount يفصل نظام الملفات — التسلسل الصحيح قبل سحب دليل مادي أو توصيله بمحطة تحليل، وإلا خسرت آخر ما كُتب عليه.", x:"sync && sudo umount /mnt/usb"}
+  ]
+}
+);
+let ONELINERS = [];
+ONELINERS = [
+  {t:"أكثر العناوين فشلاً في تسجيل الدخول (Brute Force)",
+   c:"grep \"Failed password\" /var/log/auth.log | grep -oE \"([0-9]{1,3}\\.){3}[0-9]{1,3}\" | sort | uniq -c | sort -rn | head",
+   s:"<b>grep</b> يلتقط أسطر الفشل، ثم <b>grep -oE</b> يستخرج فقط الأرقام التي تطابق نمط عنوان IP، ثم <b>sort | uniq -c</b> يعدّ تكرار كل عنوان، و<b>sort -rn | head</b> يرتّبها من الأكثر هجوماً — القائمة القصيرة التي تبدأ بها أي بلاغ تخمين."},
+  {t:"من دخل بنجاح ومن أين؟",
+   c:"grep \"Accepted\" /var/log/auth.log | awk '{print $1\" \"$2\" \"$3\" user=\"$9\" ip=\"$11}'",
+   s:"يفلتر أحداث الدخول الناجحة فقط، ثم <b>awk</b> يعيد تشكيل السطر ليعرض التاريخ والوقت واسم المستخدم وعنوان المصدر بوضوح — الخط الزمني للدخول المشروع والمشبوه معاً."},
+  {t:"أكبر عشرة طالبين في سجل الويب",
+   c:"awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head",
+   s:"الثلاثي الذهبي: استخرج عمود عنوان IP بـ <b>awk</b>، ورتّبه بـ <b>sort</b> ليجتمع المتشابه، وعُده بـ <b>uniq -c</b> ثم رتّب تنازلياً — أعلى النتائج إما زوار أوكيل أو سكربت فحص جائع."},
+  {t:"كشف ملفات SUID — باب ترقية الامتيازات",
+   c:"find / -perm -4000 -type f -ls 2>/dev/null",
+   s:"<b>find</b> بالصلاحية 4000 يعرض كل الملفات التي تعمل بصلاحية مالكها (الجذر غالباً) — القائمة القياسية معروفة، وكل جديد فيها يعني أداة ترقية امتيازات مزروعة تنتظر من ينفذها."},
+  {t:"الملفات المعدلة خلال آخر 24 ساعة",
+   c:"find / -mtime -1 -type f -ls 2>/dev/null | grep -vE \"/proc|/sys|/run\" | head -50",
+   s:"<b>-mtime -1</b> يعني آخر يوم كامل، و<b>-type f</b> ملفات فقط، ثم نرشح ضجيج الأنظمة الزائفة (<b>/proc و /sys و /run</b>) — ما يبقى هو بصمة النشاط الحديث الحقيقية على القرص."},
+  {t:"فحص كل مهام cron لكل المستخدمين دفعة واحدة",
+   c:"for u in $(cut -d: -f1 /etc/passwd); do echo \"== $u\"; sudo crontab -l -u $u 2>/dev/null; done",
+   s:"<b>cut</b> يسحب أسماء كل الحسابات من passwd، والحلقة <b>for</b> تستدعي crontab لكل واحد وتطبع نتائجه — مسح شامل لقنوات الاستمرار المجدولة في أمر واحد."},
+  {t:"البحث في أرشيف السجلات المضغوطة كاملاً",
+   c:"zgrep -h \"session opened\" /var/log/auth.log*",
+   s:"<b>zgrep</b> يبحث في الملف المضغوط وغير المضغوط معاً دون فك أي شيء (والوسم -h يخفي أسماء الملفات)، والبطراقة تلتقط الأرشيف التاريخي كله — لأن المهاجم الذكي يعرف أنك تفحص اللوق الحالي فقط."},
+  {t:"حسابات تمتلك امتياز الجذر",
+   c:"awk -F: '$3==0 {print $1}' /etc/passwd",
+   s:"<b>awk</b> بفاصل النقطتين يفحص الحقل الثالث (UID): إن كان صفراً فهو جذر — والناتج يجب أن يكون root وحدها، وكل اسم إضافي باب خلفي كامل الصلاحيات."},
+  {t:"استخراج كل الروابط من عينة مشبوهة",
+   c:"strings sample.bin | grep -Eo \"(https?|ftp)://[^ \\\"']+\" | sort -u",
+   s:"<b>strings</b> يسحب النصوص من العينة الثنائية، و<b>grep -Eo</b> يقطف فقط ما يشبه رابطاً كاملاً، و<b>sort -u</b> يحذف التكرار — قائمة عناوين C2 ومرايا التحميل المحتملة بضغطة واحدة."},
+  {t:"أكبر عشرة ملفات في شجرة السجلات",
+   c:"du -ah /var/log 2>/dev/null | sort -rh | head",
+   s:"<b>du -a</b> يحسب حجم كل ملف ومجلد، و<b>sort -rh</b> يرتب تنازلياً بالحجم — انتفاخ ملف لوج واحد فوق العادة يعني حدثاً مفاجئاً: هجوم يغرق السجل أو بيانات تُهرَّب داخله."},
+  {t:"مراقبة حية لأحداث المصادقة أثناء البلاغ",
+   c:"sudo tail -f /var/log/auth.log | grep --line-buffered -iE \"fail|invalid|break\"",
+   s:"<b>tail -f</b> يتابع اللوج لحظياً، و<b>grep --line-buffered</b> يفلتر التدفق الحي فور وروده — شاشة رادار صغيرة تعرض كل محاولة اختراق وهي تحدث أمامك مباشرة."},
+  {t:"تعداد كل مفاتيح SSH المسموح بها على النظام",
+   c:"find / -name authorized_keys 2>/dev/null -exec sh -c 'echo \"== $1\"; cat \"$1\"' _ {} \\;",
+   s:"<b>find</b> يعثر على كل ملف authorized_keys في كل مجلد رئيسي، و<b>-exec</b> يطبع محتواه — مفتاح عام غريب في ملف يعني دخولاً بلا كلمة مرور مُنح للمهاجم هديةً."}
+];
+
+/* ═══════════════ LOGIC ═══════════════ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const state={tab:"core", q:"", chip:{core:"all", soc:"all"}};
+const registry={core:[], soc:[]};
+
+function make(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e;}
+
+/* ═══ build panels ═══ */
+function buildGroup(sec,g,container,chipsRow){
+  const id=sec+"-"+g.num;
+  const chip=make("button","chip"+(state.chip[sec]==="all"?" active":""));
+  chip.style.setProperty("--g",g.color);
+  chip.textContent=g.title;
+  chip.dataset.group=id;
+  chipsRow.append(chip);
+
+  const node=make("div","group");
+  node.style.setProperty("--ga",g.color);
+  const head=make("div","g-head");
+  head.append(make("span","g-num",g.num));
+  const titles=make("div","g-titles");
+  const h3=make("h3");h3.append(make("span",null,g.title),make("code",null,g.code));
+  titles.append(h3,make("p",null,g.desc));
+  head.append(titles);
+  const badge=make("span","g-badge");badge.append(make("b",null,String(g.cmds.length))," أمر");
+  head.append(badge);
+  node.append(head);
+
+  const grid=make("div","cards");
+  const cards=[];
+  g.cmds.forEach(m=>{
+    const card=make("article","card");
+    const top=make("div","card-top");
+    top.append(make("code","cmd",m.c));
+    const cp=make("button","copy","⧉");cp.title="نسخ الأمر";
+    cp.addEventListener("click",()=>{copyText(m.c,"تم نسخ الأمر: "+m.c);cp.classList.add("done");setTimeout(()=>cp.classList.remove("done"),1200);});
+    top.append(cp);card.append(top);
+    const fn=make("div","fn");fn.append(make("span","fn-tag","الوظيفة"),make("span","fn-text",m.f));
+    card.append(fn,make("p","desc",m.d));
+    const ex=make("div","ex");ex.title="انقر لنسخ المثال";
+    ex.append(make("span","ps","$"),make("span",null,m.x));
+    ex.addEventListener("click",()=>copyText(m.x,"تم نسخ المثال"));
+    card.append(ex);grid.append(card);
+    cards.push({el:card,s:[m.c,m.f,m.d,m.x,g.title,g.code].join(" ").toLowerCase()});
+  });
+  node.append(grid);
+  container.append(node);
+  registry[sec].push({id,node,cards,color:g.color});
+}
+
+function buildOneLiners(container,chipsRow){
+  const g={num:"H",code:"WARROOM",color:"#fbbf24",title:"غرفة الحرب — خطوط قتال جاهزة",desc:"أنابيب كاملة لسيناريوهات الصيد الشهيرة: انسخها، فكّكها لتعرف كيف تعمل، ثم طوّرها بيدك.",cmds:[]};
+  const entryHolder={id:"soc-H",node:null,cards:[],color:g.color};
+  const chip=make("button","chip"+(state.chip.soc==="all"?" active":""));
+  chip.style.setProperty("--g",g.color);chip.textContent=g.title;chip.dataset.group="soc-H";
+  chipsRow.append(chip);
+
+  const node=make("div","group");node.style.setProperty("--ga",g.color);
+  const head=make("div","g-head");
+  head.append(make("span","g-num",g.num));
+  const titles=make("div","g-titles");
+  const h3=make("h3");h3.append(make("span",null,g.title),make("code",null,g.code));
+  titles.append(h3,make("p",null,g.desc));head.append(titles);
+  const badge=make("span","g-badge");badge.append(make("b",null,String(ONELINERS.length))," خط قتال");
+  head.append(badge);node.append(head);
+
+  const cards=[];
+  ONELINERS.forEach((o,i)=>{
+    const art=make("article","oneliner");
+    const head2=make("div","ol-head");
+    const idx=make("span","ol-idx","C-"+String(i+1).padStart(2,"0"));
+    head2.append(idx,make("h4",null,o.t));
+    const cp=make("button","copy","⧉");cp.title="نسخ خط القتال";
+    cp.addEventListener("click",()=>{copyText(o.c,"تم نسخ خط القتال");cp.classList.add("done");setTimeout(()=>cp.classList.remove("done"),1200);});
+    head2.append(cp);art.append(head2);
+    const pre=make("pre","ol-cmd");pre.textContent="$ "+o.c;pre.title="انقر لنسخ";
+    pre.addEventListener("click",()=>copyText(o.c,"تم نسخ خط القتال"));
+    art.append(pre);
+    const steps=make("p","ol-steps");steps.innerHTML=o.s;
+    art.append(steps);
+    node.append(art);
+    cards.push({el:art,s:[o.t,o.c,o.s.replace(/<[^>]+>/g,""),g.title].join(" ").toLowerCase()});
+  });
+  container.append(node);
+  entryHolder.node=node;entryHolder.cards=cards;
+  registry.soc.push(entryHolder);
+}
+
+[["core",CORE],["soc",SOC]].forEach(([sec,groups])=>{
+  const container=$("#groups-"+sec), chipsRow=$('[data-chips="'+sec+'"]');
+  const allChip=make("button","chip active");allChip.textContent="الكل";allChip.dataset.group="all";
+  allChip.style.setProperty("--g","#dde8fb");
+  chipsRow.append(allChip);
+  groups.forEach(g=>buildGroup(sec,g,container,chipsRow));
+  if(sec==="soc") buildOneLiners(container,chipsRow);
+});
+
+/* ═══ chips ═══ */
+$$(".chips").forEach(row=>{
+  row.addEventListener("click",e=>{
+    const btn=e.target.closest(".chip");if(!btn)return;
+    const sec=row.dataset.chips;
+    state.chip[sec]=btn.dataset.group;
+    [...row.children].forEach(c=>c.classList.toggle("active",c===btn));
+    apply();
+  });
+});
+
+/* ═══ filtering ═══ */
+function apply(){
+  const q=state.q.trim().toLowerCase();
+  ["core","soc"].forEach(sec=>{
+    let total=0,shown=0;
+    registry[sec].forEach(en=>{
+      const chipOK=state.chip[sec]==="all"||state.chip[sec]===en.id;
+      let vis=0;
+      en.cards.forEach(c=>{
+        const ok=(!q||c.s.includes(q))&&chipOK;
+        c.el.classList.toggle("hide",!ok);if(ok)vis++;
+      });
+      en.node.classList.toggle("hide",vis===0);
+      total+=en.cards.length;shown+=vis;
+    });
+    $("#empty-"+sec).classList.toggle("show",shown===0);
+    if(sec===state.tab)$("#count").textContent=shown+" / "+total+" CMD";
+  });
+}
+
+/* ═══ tabs ═══ */
+$$(".tab[data-tab]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    state.tab=btn.dataset.tab;
+    $$(".tab[data-tab]").forEach(b=>b.classList.toggle("active",b===btn||b.dataset.tab===state.tab));
+    $("#panel-core").classList.toggle("hide",state.tab!=="core");
+    $("#panel-soc").classList.toggle("hide",state.tab!=="soc");
+    apply();
+  });
+});
+
+/* ═══ search ═══ */
+let qEl=$("#q");
+qEl.addEventListener("input",()=>{state.q=qEl.value;apply();});
+document.addEventListener("keydown",e=>{
+  if(e.key==="/"&&document.activeElement!==qEl){e.preventDefault();qEl.focus();}
+  if(e.key==="Escape"&&document.activeElement===qEl){qEl.value="";state.q="";apply();qEl.blur();}
+});
+
+/* ═══ copy + toast ═══ */
+let toastT;
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),1800);}
+async function copyText(txt,label){
+  try{await navigator.clipboard.writeText(txt);}
+  catch(e){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.append(ta);ta.select();try{document.execCommand("copy");}catch(_){}ta.remove();}
+  toast(label||"تم النسخ ✓");
+}
+
+/* ═══ stats ═══ */
+(function(){
+  let n=0;CORE.forEach(g=>n+=g.cmds.length);SOC.forEach(g=>n+=g.cmds.length);
+  $("#stCmds").textContent=n+"+";
+  $("#stGroups").textContent=CORE.length+SOC.length+1;
+  $("#stLines").textContent=ONELINERS.length;
+})();
+
+/* ═══ terminal typewriter ═══ */
+const SEQ=[
+  {t:"cmd",s:"tail -f /var/log/auth.log"},
+  {t:"out",s:"Nov 19 08:41:02 soc-core sshd[2211]: <hl>Failed password</hl> for root from 203.0.113.66 port 51422 ssh2"},
+  {t:"out",s:"Nov 19 08:41:05 soc-core sshd[2211]: <hl>Failed password</hl> for root from 203.0.113.66 port 51426 ssh2"},
+  {t:"out",s:"Nov 19 08:41:09 soc-core sshd[2211]: <hl>Invalid user</hl> admin from 203.0.113.66 port 51430"},
+  {t:"cmd",s:"grep -c \"Failed password\" /var/log/auth.log"},
+  {t:"out",s:"<ok>1284</ok>"},
+  {t:"cmd",s:"last -n 3"},
+  {t:"out",s:"root     pts/0   203.0.113.66   <hl>still logged in</hl>"},
+  {t:"out",s:"analyst  pts/1   10.0.2.15     Wed Nov 18 07:12 - 16:44 (09:32)"},
+  {t:"out",s:"analyst  pts/1   10.0.2.15     Tue Nov 17 08:02 - 17:01 (08:59)"},
+  {t:"cmd",s:"sudo ufw deny from 203.0.113.66"},
+  {t:"out",s:"<ok>Rule added — containment in progress…</ok>"}
+];
+(async function typewriter(){
+  const body=$("#termBody");
+  const cur=make("span","cursor");
+  for(;;){
+    body.innerHTML="";
+    for(const step of SEQ){
+      if(step.t==="cmd"){
+        const l=make("div","tl");
+        l.append(make("span","pr","➜ "),make("span","u"),cur);
+        body.append(l);
+        const u=l.querySelector(".u");
+        for(const ch of step.s){u.textContent+=ch;await sleep(24+Math.random()*46);}
+        await sleep(420);
+      }else{
+        await sleep(240);
+        const l=make("div","tl o");l.innerHTML=step.s;body.append(l);
+      }
+    }
+    const l=make("div","tl");l.append(make("span","pr","➜ "),cur);body.append(l);
+    await sleep(6500);
+  }
+})();
+
+/* ═══ scroll progress ═══ */
+addEventListener("scroll",()=>{
+  const h=document.documentElement;
+  $("#progress").style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";
+},{passive:true});
+
+apply();
+</script>
+</body>
+</html>
